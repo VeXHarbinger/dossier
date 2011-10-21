@@ -1,0 +1,145 @@
+<html>
+<head>
+<script src='jquery-1.6.4.min.js'></script>
+<script src='jquery.json-2.2.min.js'></script>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<link rel="shortcut icon" href="logo.gif" />
+</head>
+<body>
+	<div id="title">Dossier</div>
+	<div id="selection-container">
+		<span id="select-select">select</span> 
+		<span id="select-all" class="selection-toggle">all</span> 
+		<span id="select-none">none</span>
+	</div>
+	<div id="tab-container"></div>
+	<div id="action-container">
+		<span id="action-bundle-keep">Bundle Tabs (do NOT remove from window)
+		</span>
+		<div class="action" id="action-bundle">Bundle Tabs!</div>
+	</div>	
+</body>
+<script>
+
+var windowTabs;
+var curTabID;
+
+$(document).ready(function(){
+
+	chrome.windows.getCurrent(function(window){
+		console.log(window);
+		
+		chrome.tabs.getSelected(window.id,function(t){
+			console.log(t);
+			curTabID = t.id;
+		
+			chrome.tabs.getAllInWindow(window.id,function(tabs){
+				windowTabs = tabs.slice(0);
+				tabs.forEach(function(tab){
+					if(tab.url.indexOf("chrome://") && tab.url != ""){
+			    		var tabDiv = '<div id="tab-'+tab.index+'" class="tab-element"><img class="tab-favicon" src="'+tab.favIconUrl+'"/>'+tab.title.substring(0,50)+
+			    		(tab.title.length > 50 ? '...': '')+'<img src="check.png" class="check"/></div>';
+			    		$("#tab-container").append(tabDiv);
+			    	} 
+		  		});
+
+		  		$(".tab-element").bind("click",function(){
+					$("#select-all").removeClass("selection-toggle");
+					$("#select-none").removeClass("selection-toggle");
+
+					if($(this).hasClass("selected")){ 
+						$(this).removeClass("selected");
+						$(this).find(".check").css("display","none");
+					} else {
+					 	$(this).addClass("selected");
+					 	$(this).find(".check").css("display","block");
+					}
+					checkSelectedTabs();
+				})
+
+		  		$(".tab-element").addClass("selected");
+			});
+		});
+		
+	})
+
+	
+
+	$("#select-all").click(function(){
+		$(this).addClass("selection-toggle");
+		$("#select-none").removeClass("selection-toggle");
+		$(".tab-element").each(function(){
+			$(this).addClass("selected");
+			$(this).find(".check").css("display","block");
+		});
+		checkSelectedTabs();
+	})
+		
+	$("#select-none").click(function(){
+		$(this).addClass("selection-toggle");
+		$("#select-all").removeClass("selection-toggle");
+		$(".tab-element").each(function(){
+			$(this).removeClass("selected");
+			$(this).find(".check").css("display","none");
+		});
+		checkSelectedTabs();
+	})
+
+	function checkSelectedTabs(){
+		if($(".selected").length > 0){
+			$("#action-bundle").css("opacity",1);
+			$("#action-bundle-keep").css("opacity",1);
+		} else {
+			$("#action-bundle").css("opacity",0.5);
+			$("#action-bundle-keep").css("opacity",0.5);
+		}
+	}
+
+	$("#action-bundle-keep").click(function(){
+		sendTabsToCollection(false);
+	})
+
+	$("#action-bundle").click(function(){
+		sendTabsToCollection(true);
+	});
+
+	function sendTabsToCollection(removeFromWindow){
+		if($(".selected").length > 0){
+			var tabsChecked = 0;
+			var tabsCaptured = Array();
+			
+			for(var i=0;i<windowTabs.length;i++){
+				var tab = windowTabs[i];
+				
+				if($("#tab-"+tab.index+"").hasClass("selected")){
+					//stringToEmail += windowTabs[i].title + encodeURIComponent("\n") + windowTabs[i].url + encodeURIComponent("\n\n");
+					tabsCaptured.push(windowTabs[i]);
+					tabsChecked++; 
+				}
+			}
+			if(tabsChecked > 0){
+				chrome.tabs.create({ url: "dossier_collection.html" },function(tab){
+					
+					chrome.tabs.sendRequest(tab.id,{tabs: tabsCaptured}, 
+						function(response) {
+							// console.log(response.success);
+					});
+					
+					if(removeFromWindow) {
+						tabsCaptured.forEach(function(tabCap){
+							chrome.tabs.remove(tabCap.id,function(){
+								console.log("Tab Removed: "+tabCap.index);
+							});
+						});
+					}
+					self.close();
+					//chrome.tabs.executeScript(tab.id,"updateContents("+$.toJSON(tabsCaptured)+")");
+				});
+			} 
+		}
+	}
+
+})
+
+</script>
+</html>

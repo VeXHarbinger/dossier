@@ -1,0 +1,115 @@
+body {
+	min-width:470px;
+	padding:0 10px 0 10px;
+	overflow-x:hidden;
+	font-family:"Helvetica Neue", Helvetica, Verdana;
+	background:url(background.gif) center no-repeat;
+}
+#tab-container {
+	margin:5px;
+	font-size:14px;
+	letter-spacing:-0.2px;
+	float:left;
+	width:450px;
+}
+#tab-container, #selection-container, #action-container,
+  #dossier-tabs-saved-container {
+	float:left;
+	clear:both;
+}
+
+#dossier-tabs-saved-container {
+	margin: 20px 0;
+}
+
+
+.tab-element {
+	width:450px;
+	background-image:url(transparent.png);
+	-webkit-border-radius: 3px;
+	margin-bottom:3px;
+	cursor:pointer;
+	height: 17px;
+	padding-top: 2px;
+	float:left;
+}
+
+.tab-element-collection {
+	background-image:url(transparent.png);
+	-webkit-border-radius: 3px;
+	margin-bottom:3px;
+	padding-top: 2px;
+	float:left;
+	font-size:12px;
+	clear:both;
+}
+.tab-element-collection a { 
+	margin:0 10px 0 10px; 
+	color:#D93; font-size:10px;
+}
+
+.selected { 
+	background-color:#dda ; 
+}
+
+.check { float:right; }
+
+
+#title { width:450px; font-size:18px; border-bottom:1px solid gray; }
+#selection-container { font-size: 13px; }
+#actions { margin-top:5px; border-top:1px solid gray;  }
+
+#action-bundle-keep {
+	float: right;
+	font-size: 11px;
+	margin: 6px 10px;
+	padding: 4px;
+	-webkit-border-radius: 3px;
+	background-color: #F30;
+	color: #fff;
+	cursor:pointer;
+}
+
+.action { 
+	display: block;
+	padding-top: 15px;
+	color: white;
+	cursor: pointer;
+	height: 35px;
+	background-color: #DD6;
+	width: 150px;
+	text-align: center;
+	font-weight: bold;
+	-webkit-border-radius: 5px;
+	margin: 5px 12px;
+	float:left;
+	 
+}
+
+#action-email-sendto { display:none; }
+
+.tab-favicon { 
+	width:15px; 
+	height:15px; 
+	margin:0 10px 0 10px; 
+	color:white; 
+	border:1px;
+	solid gray;
+}
+
+#debug { background-color:#dcc; }
+#select-all, #select-none { cursor:pointer; }
+.selection-toggle { 
+	font-weight:bold; 
+	background-color: #DDD;
+	padding: 0 5px 0 5px;
+}
+
+.toggle { 
+	display:block; 
+	float:left; 
+	width:15px; 
+	height:15px; 
+	cursor:pointer; 
+	color:#ddd
+}

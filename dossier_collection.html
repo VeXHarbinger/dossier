@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>New Dossier List</title>
+<script src='jquery-1.6.4.min.js'></script>
+<script src='jquery.json-2.2.min.js'></script>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<link rel="shortcut icon" href="logo.gif" />
+</head>
+<body>
+	<div id="title">Dossier: Your List</div>
+	<div id="dossier-tabs-saved-container"></div>
+	<div id="action-container">
+		<div class="action" id="action-email">Email It</div>
+		<div class="action" id="action-restore">Restore Tabs</div>
+		<a href="" id="action-email-sendto">&nbsp;</a>
+	</div>
+</body>
+<script>
+
+var tabs;
+
+$(document).ready(function(){
+
+	$("#action-email").click(function(){
+		
+		var stringToEmail = "mailto: ?subject=Dossier Link List";
+		stringToEmail += "&body=Links gathered for you:" + 
+			encodeURIComponent("\n") + "--------------------------" + encodeURIComponent("\n\n");
+		
+		tabs.forEach(function(tab){
+			stringToEmail += encodeURIComponent(tab.title) + encodeURIComponent("\n") +
+			encodeURIComponent(tab.url) + encodeURIComponent("\n\n");	
+		});
+		window.location.href = stringToEmail;
+	})
+	
+	$("#action-restore").click(function(){
+		tabs.forEach(function(tab){
+			console.log(tab);
+			var tabInfo = {};
+			tabInfo.url = tab.url;
+			tabInfo.selected = false;
+			chrome.tabs.create(tabInfo, function(){ });
+		});
+	})
+
+});
+
+
+chrome.extension.onRequest.addListener(
+	function(request, sender, sendResponse) {
+		
+		if (request.tabs.length > 0){
+			sendResponse({success: true});
+			tabs = request.tabs.slice(0);
+			request.tabs.forEach(function(tab){
+				var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
+				+ tab.favIconUrl+'"/>'+
+				tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
+
+				$("#dossier-tabs-saved-container").append(tabDiv);
+
+			});
+		} else {
+	  		sendResponse({success: false, error: "no tabs selected"}); 
+	  	}
+});
+
+
+</script>
+</html>
