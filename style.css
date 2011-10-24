@@ -65,6 +65,17 @@ body {
 	float:left;
 }
 
+.list-element-collection {
+	background-image:url(transparent.png);
+	-webkit-border-radius: 3px;
+	margin-bottom:3px;
+	padding-top: 2px;
+	float:left;
+	font-size:15px;
+	clear:both;
+	text-decoration:underline;
+}
+
 .tab-element-collection {
 	background-image:url(transparent.png);
 	-webkit-border-radius: 3px;
@@ -80,6 +91,8 @@ body {
 	font-size: 11px;
 	font-weight: bold;
 }
+
+#view-dossier-list-page { display:none; }
 
 .selected { 
 	background-color:#dda ; 
@@ -118,6 +131,51 @@ body {
 	float:left;
 	 
 }
+
+#remove-list-button { 
+	float: left;
+	background-color: #F22;
+	-webkit-border-radius: 5px;
+	text-align: center;
+	color: white;
+	font-size: 16px;
+	font-weight: bold;
+	width: 150px;
+	height: 35px;
+	margin: 5px 12px;
+	padding-top: 15px;
+}
+
+#remove-list-popover {
+	position:fixed;
+	top:20px;
+	left:20px;
+	width:400px;
+	background-color:#ddd;
+	border:2px solid #FCC;
+	color:#000;
+	display:none;
+	padding: 20px;
+}
+
+#remove-confirmation {
+	clear:both;
+	margin-bottom:20px;
+}
+#remove-button-yes, #remove-button-no, #remove-list-button { cursor:pointer; } 
+#remove-button-yes, #remove-button-no { 
+	float:left;  
+	-webkit-border-radius: 5px;
+	padding:10px;
+	text-align:center;
+	color:#fff;
+	font-size:13px;
+	font-weight:bold;
+}
+
+#remove-button-no { background-color:#FC0; }
+#remove-button-yes { background-color:#F22; margin-right: 25px; }
+
 
 #action-email-sendto { display:none; }
 

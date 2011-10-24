@@ -14,12 +14,55 @@
 		<div class="action" id="action-restore">Restore Tabs</div>
 		<a href="" id="action-email-sendto">&nbsp;</a>
 	</div>
+	<div id="remove-list-button">Delete This List</div>
+	<div id="remove-list-popover">
+		<div id="remove-confirmation"><strong>Delete this List</strong> Are you sure? This cannot be undone.</div>
+		<div id="remove-button-yes">Yes, I'm sure.</div>
+		<div id="remove-button-no">No, thanks.</div>
+	</div>
 </body>
 <script>
 
 var tabs;
+var thisID;
+var curTabID;
+var localStorageObj;
+
+chrome.windows.getCurrent(function(window){
+	//console.log(window);
+	
+	chrome.tabs.getSelected(window.id,function(t){
+		//console.log(t);
+		curTabID = t.id;
+	});
+});
 
 $(document).ready(function(){
+
+	$("#remove-list-button").click(function(){
+		$("#remove-list-popover").slideDown();
+	})
+	$("#remove-button-yes").click(function(){
+		console.log("Send Local Storage Request");
+		chrome.extension.sendRequest({method: "getLocalStorage"}, function(response) {
+			console.log(response);
+
+			if(response.data != "" && response.data != "undefined") {
+				localStorageObj = JSON.parse(response.data);
+
+				delete localStorageObj.lists[thisID];
+
+				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
+			  			console.log(response);
+			  			chrome.tabs.remove(curTabID,function(){ })
+			  		}
+			  	);
+			}
+		});
+	});
+	$("#remove-button-no").click(function(){
+		$("#remove-list-popover").slideUp();
+	});
 
 	$("#action-email").click(function(){
 		
@@ -49,24 +92,28 @@ $(document).ready(function(){
 
 chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
-		
-		if (request.tabs.length > 0){
-			sendResponse({success: true});
-			tabs = request.tabs.slice(0);
-			
-			$("#title").text("Dossier: "+request.title);
-			
-			request.tabs.forEach(function(tab){
-				var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
-				+ tab.favIconUrl+'"/>'+
-				tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
+		if(request.method == "newTab"){
+			if (request.tabs.length > 0){
+				sendResponse({success: true});
+				tabs = request.tabs.slice(0);
+				thisID = request.date;
+				console.log(thisID);
 
-				$("#dossier-tabs-saved-container").append(tabDiv);
+				$("#title").text("Dossier: "+request.title);
+				document.title = request.title;
 
-			});
-		} else {
-	  		sendResponse({success: false, error: "no tabs selected"}); 
-	  	}
+				request.tabs.forEach(function(tab){
+					var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
+					+ tab.favIconUrl+'"/>'+
+					tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
+
+					$("#dossier-tabs-saved-container").append(tabDiv);
+
+				});
+			} else {
+		  		sendResponse({success: false, error: "no tabs selected"}); 
+		  	}
+		}
 });
 
 

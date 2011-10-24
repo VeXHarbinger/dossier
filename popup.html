@@ -34,8 +34,18 @@
 
 var windowTabs;
 var curTabID;
+var localStorageObj = {};
 
 $(document).ready(function(){
+
+	$("#clearStorage").click(function(){
+		localStorageObj = {};
+		chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
+	  			console.log(response);
+	  		}
+	  	);	
+
+	})
 
 	$("#new-list-name").live("click",function(){
 		var curListName = $(this).text();
@@ -53,19 +63,21 @@ $(document).ready(function(){
 		}
 	})
 	
-	if(localStorage.lists != undefined){
-		$("#select-page-container").css("visibility","visible");
-	}
-	
-	$("#new-list-name").click(function(){
-		$("#input-list-name").removeClass("page-selected");
+	$("#create-page-tab").click(function(){
+		$("#view-page-tab").removeClass("page-selected");
+		$(this).addClass("page-selected");
+		$("#create-dossier-page").css("display","block");
+		$("#view-dossier-list-page").css("display","none");
 	})
 	
-	$("#input-list-name").click(function(){
-		$("#new-list-name").removeClass("page-selected");
+	$("#view-page-tab").click(function(){
+		$("#create-page-tab").removeClass("page-selected");
+		$(this).addClass("page-selected");
+		$("#view-dossier-list-page").css("display","block");
+		$("#create-dossier-page").css("display","none");
 	})
 	
-<!--
+/*
 	$("#edit-list-name").click(function(){
 		if($("#edit-list-name").text() == "edit"){
 			var curListName = $("#new-list-name").text();
@@ -81,13 +93,13 @@ $(document).ready(function(){
 			$("#edit-list-name").text("edit");
 		}
 	})
--->
+*/
 
 	chrome.windows.getCurrent(function(window){
-		console.log(window);
+		//console.log(window);
 		
 		chrome.tabs.getSelected(window.id,function(t){
-			console.log(t);
+			//console.log(t);
 			curTabID = t.id;
 		
 			chrome.tabs.getAllInWindow(window.id,function(tabs){
@@ -116,11 +128,45 @@ $(document).ready(function(){
 
 		  		$(".tab-element").addClass("selected");
 			});
+
+			console.log("Send Local Storage Request");
+			chrome.extension.sendRequest({method: "getLocalStorage"}, function(response) {
+				console.log(response);
+
+				if(response.data != "" && response.data != "undefined") {
+					localStorageObj = JSON.parse(response.data);
+			  	
+				  	if(localStorageObj.lists != undefined && localStorageObj.lists != "{}"){
+	
+						var listCount = 0;
+						$.each(localStorageObj.lists,function(key, lists){
+							listCount++;
+						});
+						if(listCount > 0){
+						 	$("#select-page-container").css("visibility","visible");
+
+
+						 	$.each(localStorageObj.lists, function(key, lists){
+	//					 	localStorageObj.lists.forEach(function(lists){
+						 		var listItem = "<div class='list-element-collection' style='cursor:pointer' id='"+ lists.date + "'>" + lists.title + " (" + lists.tabs.length + " tabs)</div>";
+						 		
+						 		$("#lists-container").append(listItem);
+
+						 	})
+						}
+					}
+				}
+			});
 		});
 		
 	})
 
-	
+	$(".list-element-collection").live("click",function(){
+		var thisID = $(this).attr("id");
+		var thisList = localStorageObj.lists[thisID]; 
+		console.log(thisList);
+		openTabsInNewTab(thisList.title,thisList,false, false);
+	})
 
 	$("#select-all").click(function(){
 		$(this).addClass("selection-toggle");
@@ -176,34 +222,46 @@ $(document).ready(function(){
 			}
 			if(tabsChecked > 0){
 				var titleOfList = $("#new-list-name").text();
-				if(titleOfList == "") titleOfList = $("#input-list-name").text()
+				if(titleOfList == "") titleOfList = $("#input-list-name").attr("value");
 			
-				openTabsInNewTab(titleOfList, tabsCaptured, removeFromWindow);
+				var creationDate = new Date();
+				var cDateString = creationDate.toUTCString().replace(/ /g,"");
+				console.log(cDateString);
+				var newListElement = {method: "newTab", title:titleOfList, tabs: tabsCaptured, date:cDateString};
+				
+				if(localStorageObj.lists == undefined) localStorageObj.lists = {};
+
+				localStorageObj.lists[cDateString] = newListElement;
+				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
+		  				console.log(response);
+		  			}
+		  		);
+
+				openTabsInNewTab(titleOfList, newListElement, removeFromWindow, true);
 			} 
 		}
 	}
-	
-	function openTabsInNewTab(listTitle, tabsToList, removeFromWindow){
+
+	function openTabsInNewTab(listTitle, tabsToList, removeFromWindow, closePopover){
 		chrome.tabs.create({ url: "dossier_collection.html" },function(tab){
-			
-			var newListElement = {title:listTitle, tabs: tabsToList};
-			if(localStorage.lists == undefined) localStorage.lists = new Array();	
-			localStorage.lists.push(newListElement);
-			
-			chrome.tabs.sendRequest(tab.id,newListElement, function(response) {
-					// console.log(response.success);
-			});
-			
-			if(removeFromWindow) {
-				tabsToList.forEach(function(tabCap){
-					chrome.tabs.remove(tabCap.id,function(){
-						console.log("Tab Removed: "+tabCap.index);
-					});
-				});
-			}
-			self.close();
-			//chrome.tabs.executeScript(tab.id,"updateContents("+$.toJSON(tabsCaptured)+")");
+			chrome.tabs.sendRequest(tab.id,tabsToList, function(response) { });
 		});
+		if(removeFromWindow) {
+			var tabCount = tabsToList.tabs.length;
+			console.log(tabCount);
+			var tabsRemoved = 0;
+			$.each(tabsToList.tabs,function(key,tabCap){
+				console.log(tabCap);
+				chrome.tabs.remove(tabCap.id,function(){
+					console.log("Tab Removed: "+tabCap.index);
+					tabsRemoved++;
+					if(tabsRemoved == tabCount){
+						if(closePopover) self.close();
+					}
+				});
+			});
+		}
+		
 	}
 
 })
