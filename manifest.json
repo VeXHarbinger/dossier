@@ -1,7 +1,7 @@
 {
   "name": "Dossier",
   "version": "1.0",
-  "description": "Bundle those tabs and share.",
+  "description": "Simple tab collection for Chrome",
   "browser_action": {
     "default_icon": "logo.gif",
     "default_title": "Dossier",
@@ -9,7 +9,6 @@
   },
   "permissions": [
     "http://*/*",
-    "tabs"/*,
-    "experimental" */
+    "tabs"
   ]
 }
