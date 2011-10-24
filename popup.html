@@ -7,17 +7,28 @@
 </head>
 <body>
 	<div id="title">Dossier</div>
-	<div id="selection-container">
-		<span id="select-select">select</span> 
-		<span id="select-all" class="selection-toggle">all</span> 
-		<span id="select-none">none</span>
+	<div id="select-page-container">
+		<div id="create-page-tab" class="page-selected">Make a List</div>
+		<div id="view-page-tab">View Lists</div>
 	</div>
-	<div id="tab-container"></div>
-	<div id="action-container">
-		<span id="action-bundle-keep">Bundle Tabs (do NOT remove from window)
-		</span>
-		<div class="action" id="action-bundle">Bundle Tabs!</div>
-	</div>	
+	<div id="create-dossier-page">
+		<span id="new-list-name">A New List</span> <!--<span id="edit-list-name">edit</span>-->
+		<div id="selection-container">
+			<span id="select-select">select</span> 
+			<span id="select-all" class="selection-toggle">all</span> 
+			<span id="select-none">none</span>
+		</div>
+		
+		<div id="tab-container"></div>
+		<div id="action-container">
+			<span id="action-bundle-keep">Bundle Tabs (do NOT remove from window)
+			</span>
+			<div class="action" id="action-bundle">Bundle Tabs!</div>
+		</div>
+	</div>
+	<div id="view-dossier-list-page">
+		<div id="lists-container"></div>
+	</div>
 </body>
 <script>
 
@@ -25,6 +36,52 @@ var windowTabs;
 var curTabID;
 
 $(document).ready(function(){
+
+	$("#new-list-name").live("click",function(){
+		var curListName = $(this).text();
+		$(this).parent().prepend("<input id='input-list-name' value='"+curListName+"'/>");
+		$("#input-list-name").focus();
+		$(this).remove();
+	})
+	$("#input-list-name").live("keypress",function(e){
+		if(e.which == 13){
+			var curListName = $(this).attr("value");
+			if(curListName == "") curListName = "New List";
+			$(this).parent().prepend("<span id='new-list-name'>"+curListName+"</span>");
+			$(this).remove();
+			return false;
+		}
+	})
+	
+	if(localStorage.lists != undefined){
+		$("#select-page-container").css("visibility","visible");
+	}
+	
+	$("#new-list-name").click(function(){
+		$("#input-list-name").removeClass("page-selected");
+	})
+	
+	$("#input-list-name").click(function(){
+		$("#new-list-name").removeClass("page-selected");
+	})
+	
+<!--
+	$("#edit-list-name").click(function(){
+		if($("#edit-list-name").text() == "edit"){
+			var curListName = $("#new-list-name").text();
+			$("#new-list-name").parent().prepend("<input id='input-list-name' value='"+curListName+"'/>");
+			$("#new-list-name").remove();
+			$("#input-list-name").focus();
+			$("#edit-list-name").text("done");
+		}
+		if($("#edit-list-name").text() == "done"){
+			var curListName = $("#input-list-name").attr("value");
+			$("#input-list-name").parent().prepend("<span id='new-list-name'>"+curListName+"</span>");
+			$("#input-list-name").remove();
+			$("#edit-list-name").text("edit");
+		}
+	})
+-->
 
 	chrome.windows.getCurrent(function(window){
 		console.log(window);
@@ -118,25 +175,35 @@ $(document).ready(function(){
 				}
 			}
 			if(tabsChecked > 0){
-				chrome.tabs.create({ url: "dossier_collection.html" },function(tab){
-					
-					chrome.tabs.sendRequest(tab.id,{tabs: tabsCaptured}, 
-						function(response) {
-							// console.log(response.success);
-					});
-					
-					if(removeFromWindow) {
-						tabsCaptured.forEach(function(tabCap){
-							chrome.tabs.remove(tabCap.id,function(){
-								console.log("Tab Removed: "+tabCap.index);
-							});
-						});
-					}
-					self.close();
-					//chrome.tabs.executeScript(tab.id,"updateContents("+$.toJSON(tabsCaptured)+")");
-				});
+				var titleOfList = $("#new-list-name").text();
+				if(titleOfList == "") titleOfList = $("#input-list-name").text()
+			
+				openTabsInNewTab(titleOfList, tabsCaptured, removeFromWindow);
 			} 
 		}
+	}
+	
+	function openTabsInNewTab(listTitle, tabsToList, removeFromWindow){
+		chrome.tabs.create({ url: "dossier_collection.html" },function(tab){
+			
+			var newListElement = {title:listTitle, tabs: tabsToList};
+			if(localStorage.lists == undefined) localStorage.lists = new Array();	
+			localStorage.lists.push(newListElement);
+			
+			chrome.tabs.sendRequest(tab.id,newListElement, function(response) {
+					// console.log(response.success);
+			});
+			
+			if(removeFromWindow) {
+				tabsToList.forEach(function(tabCap){
+					chrome.tabs.remove(tabCap.id,function(){
+						console.log("Tab Removed: "+tabCap.index);
+					});
+				});
+			}
+			self.close();
+			//chrome.tabs.executeScript(tab.id,"updateContents("+$.toJSON(tabsCaptured)+")");
+		});
 	}
 
 })

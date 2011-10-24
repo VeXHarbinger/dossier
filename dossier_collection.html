@@ -7,7 +7,7 @@
 <link rel="shortcut icon" href="logo.gif" />
 </head>
 <body>
-	<div id="title">Dossier: Your List</div>
+	<div id="title">Dossier: New List</div>
 	<div id="dossier-tabs-saved-container"></div>
 	<div id="action-container">
 		<div class="action" id="action-email">Email It</div>
@@ -53,6 +53,9 @@ chrome.extension.onRequest.addListener(
 		if (request.tabs.length > 0){
 			sendResponse({success: true});
 			tabs = request.tabs.slice(0);
+			
+			$("#title").text("Dossier: "+request.title);
+			
 			request.tabs.forEach(function(tab){
 				var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
 				+ tab.favIconUrl+'"/>'+
