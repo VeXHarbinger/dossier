@@ -14,10 +14,7 @@ chrome.extension.onRequest.addListener(
 		if (request.method == "getLocalStorage") {
 			if(localStorage.clump == undefined) localStorage.clump = "";
 			sendResponse({message:"getLocal",data: localStorage.clump});
-			console.log("Got Local");
 		} else if(request.method == "setLocalStorage"){
-			console.log("Setting Local");
-			console.log(request.data);
 			if(localStorage.clump == "undefined") localStorage.clump = "";
 			localStorage.clump = JSON.stringify(request.data);
 			sendResponse({message:"setLocal",data: JSON.parse(localStorage.clump)});

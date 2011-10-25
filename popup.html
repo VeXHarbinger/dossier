@@ -40,9 +40,7 @@ $(document).ready(function(){
 
 	$("#clearStorage").click(function(){
 		localStorageObj = {};
-		chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
-	  			console.log(response);
-	  		}
+		chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) { }
 	  	);	
 
 	})
@@ -97,18 +95,18 @@ $(document).ready(function(){
 */
 
 	chrome.windows.getCurrent(function(window){
-		//console.log(window);
 		
 		chrome.tabs.getSelected(window.id,function(t){
-			//console.log(t);
 			curTabID = t.id;
 		
 			chrome.tabs.getAllInWindow(window.id,function(tabs){
 				windowTabs = tabs.slice(0);
 				var currentTabCount = 0;
 				
-				tabs.forEach(function(tab){
+				//tabs.forEach(function(tab){
+				$.each(tabs,function(key,tab){
 					if(tab.url.indexOf("chrome://") && tab.url != "" && tab.url.indexOf("dossier_collection") < 0){
+			    		
 			    		var tabDiv = '<div id="tab-'+tab.index+'" class="tab-element"><img class="tab-favicon" src="'+tab.favIconUrl+'"/>'+tab.title.substring(0,50)+
 			    		(tab.title.length > 50 ? '...': '')+'<img src="check.png" class="check"/></div>';
 			    		$("#tab-container").append(tabDiv);
@@ -141,10 +139,8 @@ $(document).ready(function(){
 		  		$(".tab-element").addClass("selected");
 			});
 
-			console.log("Send Local Storage Request");
 			chrome.extension.sendRequest({method: "getLocalStorage"}, function(response) {
-				console.log(response);
-
+			
 				if(response.data != "" && response.data != "undefined") {
 					localStorageObj = JSON.parse(response.data);
 			  	
@@ -176,7 +172,6 @@ $(document).ready(function(){
 	$(".list-element-collection").live("click",function(){
 		var thisID = $(this).attr("id");
 		var thisList = localStorageObj.lists[thisID]; 
-		console.log(thisList);
 		openTabsInNewTab(thisList.title,thisList,false, false);
 	})
 
@@ -238,15 +233,12 @@ $(document).ready(function(){
 			
 				var creationDate = new Date();
 				var cDateString = creationDate.toUTCString().replace(/ /g,"");
-				console.log(cDateString);
 				var newListElement = {method: "newTab", title:titleOfList, tabs: tabsCaptured, date:cDateString};
 				
 				if(localStorageObj.lists == undefined) localStorageObj.lists = {};
 
 				localStorageObj.lists[cDateString] = newListElement;
-				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
-		  				console.log(response);
-		  			}
+				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) { }
 		  		);
 
 				openTabsInNewTab(titleOfList, newListElement, removeFromWindow, true);
@@ -260,18 +252,19 @@ $(document).ready(function(){
 		});
 		if(removeFromWindow) {
 			var tabCount = tabsToList.tabs.length;
-			console.log(tabCount);
 			var tabsRemoved = 0;
 			$.each(tabsToList.tabs,function(key,tabCap){
-				console.log(tabCap);
 				chrome.tabs.remove(tabCap.id,function(){
-					console.log("Tab Removed: "+tabCap.index);
 					tabsRemoved++;
 					if(tabsRemoved == tabCount){
-						if(closePopover) self.close();
+						if(closePopover){
+							self.close();	
+						} 
 					}
 				});
 			});
+		} else {
+			if(closePopover) self.close();
 		}
 		
 	}

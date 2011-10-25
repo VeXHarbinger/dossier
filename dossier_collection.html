@@ -29,10 +29,8 @@ var curTabID;
 var localStorageObj;
 
 chrome.windows.getCurrent(function(window){
-	//console.log(window);
 	
 	chrome.tabs.getSelected(window.id,function(t){
-		//console.log(t);
 		curTabID = t.id;
 	});
 });
@@ -43,17 +41,14 @@ $(document).ready(function(){
 		$("#remove-list-popover").slideDown();
 	})
 	$("#remove-button-yes").click(function(){
-		console.log("Send Local Storage Request");
 		chrome.extension.sendRequest({method: "getLocalStorage"}, function(response) {
-			console.log(response);
-
+		
 			if(response.data != "" && response.data != "undefined") {
 				localStorageObj = JSON.parse(response.data);
 
 				delete localStorageObj.lists[thisID];
 
 				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
-			  			console.log(response);
 			  			chrome.tabs.remove(curTabID,function(){ })
 			  		}
 			  	);
@@ -70,7 +65,8 @@ $(document).ready(function(){
 		stringToEmail += "&body=Links gathered for you:" + 
 			encodeURIComponent("\n") + "--------------------------" + encodeURIComponent("\n\n");
 		
-		tabs.forEach(function(tab){
+		//tabs.forEach(function(tab){
+		$.each(tabs,function(key,tab){
 			stringToEmail += encodeURIComponent(tab.title) + encodeURIComponent("\n") +
 			encodeURIComponent(tab.url) + encodeURIComponent("\n\n");	
 		});
@@ -78,8 +74,8 @@ $(document).ready(function(){
 	})
 	
 	$("#action-restore").click(function(){
-		tabs.forEach(function(tab){
-			console.log(tab);
+		//tabs.forEach(function(tab){
+		$.each(tabs,function(key,tab){
 			var tabInfo = {};
 			tabInfo.url = tab.url;
 			tabInfo.selected = false;
@@ -97,12 +93,12 @@ chrome.extension.onRequest.addListener(
 				sendResponse({success: true});
 				tabs = request.tabs.slice(0);
 				thisID = request.date;
-				console.log(thisID);
-
+			
 				$("#title").text("Dossier: "+request.title);
 				document.title = request.title;
 
-				request.tabs.forEach(function(tab){
+				//request.tabs.forEach(function(tab){
+				$.each(request.tabs,function(key,tab){
 					var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
 					+ tab.favIconUrl+'"/>'+
 					tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
