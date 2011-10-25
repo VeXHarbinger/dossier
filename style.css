@@ -12,7 +12,7 @@ body {
 	float:left;
 	width:450px;
 }
-#tab-container, #selection-container, #action-container,
+#tab-container, #action-container,
   #dossier-tabs-saved-container {
 	float:left;
 	clear:both;
@@ -23,7 +23,8 @@ body {
 }
 
 #new-list-name { font-size:16px; margin:7px 0px; display:block; float:left; clear:both; }
-#input-list-name { border:1px solid #999; font-size:16px; margin:7px 0px; width:150px; display:block; float:left; clear:both;}
+#input-list-name { border:1px solid #999; font-size:16px; margin:7px 0px; width:200px; float:left; /* display:block;  clear:both; */}
+#new-list-title { float: left; margin: 9px 5px; }
 
 #select-page-container div {
 	float:left;
@@ -68,12 +69,17 @@ body {
 .list-element-collection {
 	background-image:url(transparent.png);
 	-webkit-border-radius: 3px;
-	margin-bottom:3px;
+	margin-bottom:5px;
 	padding-top: 2px;
 	float:left;
-	font-size:15px;
+	font-size:16px;
 	clear:both;
-	text-decoration:underline;
+	cursor:pointer;
+	color:#C72;
+}
+
+.list-element-collection:hover {
+	text-decoration: underline;
 }
 
 .tab-element-collection {
@@ -102,7 +108,7 @@ body {
 
 
 #title { width:450px; font-size:18px; border-bottom:1px solid gray; }
-#selection-container { font-size: 13px; float:left; }
+#selection-container { font-size: 13px; float:right; margin-right: 10px; margin-top: -5px;}
 #actions { margin-top:5px; border-top:1px solid gray;  }
 
 #action-bundle-keep {
@@ -189,11 +195,10 @@ body {
 }
 
 #debug { background-color:#dcc; }
-#select-all, #select-none { cursor:pointer; }
+#select-all, #select-none { cursor:pointer; padding-left:5px; padding-right:5px; }
 .selection-toggle { 
 	font-weight:bold; 
 	background-color: #DDD;
-	padding: 0 5px 0 5px;
 }
 
 .toggle { 

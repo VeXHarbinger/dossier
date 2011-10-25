@@ -12,7 +12,7 @@
 		<div id="view-page-tab">View Lists</div>
 	</div>
 	<div id="create-dossier-page">
-		<span id="new-list-name">A New List</span> <!--<span id="edit-list-name">edit</span>-->
+		<span id="new-list-title">Title: </span><input id="input-list-name" value="New List"/> <!--<span id="edit-list-name">edit</span>-->
 		<div id="selection-container">
 			<span id="select-select">select</span> 
 			<span id="select-all" class="selection-toggle">all</span> 
@@ -47,18 +47,19 @@ $(document).ready(function(){
 
 	})
 
-	$("#new-list-name").live("click",function(){
-		var curListName = $(this).text();
-		$(this).parent().prepend("<input id='input-list-name' value='"+curListName+"'/>");
-		$("#input-list-name").focus();
-		$(this).remove();
-	})
+	//$("#new-list-name").live("click",function(){
+	//	var curListName = $(this).text();
+	//	$(this).parent().prepend("<input id='input-list-name' value='"+curListName+"'/>");
+	//	$("#input-list-name").focus();
+	//	$(this).remove();
+	//})
+
 	$("#input-list-name").live("keypress",function(e){
 		if(e.which == 13){
-			var curListName = $(this).attr("value");
-			if(curListName == "") curListName = "New List";
-			$(this).parent().prepend("<span id='new-list-name'>"+curListName+"</span>");
-			$(this).remove();
+			//var curListName = $(this).attr("value");
+			if(curListName == "") $(this).val("New List");
+			//$(this).parent().prepend("<span id='new-list-name'>"+curListName+"</span>");
+			$(this).blur();
 			return false;
 		}
 	})
@@ -104,14 +105,25 @@ $(document).ready(function(){
 		
 			chrome.tabs.getAllInWindow(window.id,function(tabs){
 				windowTabs = tabs.slice(0);
+				var currentTabCount = 0;
+				
 				tabs.forEach(function(tab){
-					if(tab.url.indexOf("chrome://") && tab.url != ""){
+					if(tab.url.indexOf("chrome://") && tab.url != "" && tab.url.indexOf("dossier_collection") < 0){
 			    		var tabDiv = '<div id="tab-'+tab.index+'" class="tab-element"><img class="tab-favicon" src="'+tab.favIconUrl+'"/>'+tab.title.substring(0,50)+
 			    		(tab.title.length > 50 ? '...': '')+'<img src="check.png" class="check"/></div>';
 			    		$("#tab-container").append(tabDiv);
+			    		currentTabCount++;
 			    	} 
 		  		});
 
+				
+				//if($("#select-page-container").css("visibility") == "visible" && currentTabCount == 0){
+					// in conditions where there are lists, but no open tabs, show lists first
+				//	$("#select-page-container").css("visibility","hidden");
+				//	$("#view-dossier-list-page").css("display","block");
+				//	$("#create-dossier-page").css("display","none");
+				//}
+				
 		  		$(".tab-element").bind("click",function(){
 					$("#select-all").removeClass("selection-toggle");
 					$("#select-none").removeClass("selection-toggle");
@@ -144,11 +156,11 @@ $(document).ready(function(){
 						});
 						if(listCount > 0){
 						 	$("#select-page-container").css("visibility","visible");
-
+							
 
 						 	$.each(localStorageObj.lists, function(key, lists){
 	//					 	localStorageObj.lists.forEach(function(lists){
-						 		var listItem = "<div class='list-element-collection' style='cursor:pointer' id='"+ lists.date + "'>" + lists.title + " (" + lists.tabs.length + " tabs)</div>";
+						 		var listItem = "<div class='list-element-collection' style='cursor:pointer' id='"+ lists.date + "'>&#0187; " + lists.title + " (" + lists.tabs.length + " tabs)</div>";
 						 		
 						 		$("#lists-container").append(listItem);
 
@@ -221,8 +233,8 @@ $(document).ready(function(){
 				}
 			}
 			if(tabsChecked > 0){
-				var titleOfList = $("#new-list-name").text();
-				if(titleOfList == "") titleOfList = $("#input-list-name").attr("value");
+				var titleOfList = $("#input-list-name").val();
+				if(titleOfList == "") titleOfList = "New List"; //$("#input-list-name").attr("value");
 			
 				var creationDate = new Date();
 				var cDateString = creationDate.toUTCString().replace(/ /g,"");
