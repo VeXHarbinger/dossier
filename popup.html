@@ -172,7 +172,11 @@ $(document).ready(function(){
 	$(".list-element-collection").live("click",function(){
 		var thisID = $(this).attr("id");
 		var thisList = localStorageObj.lists[thisID]; 
-		openTabsInNewTab(thisList.title,thisList,false, false);
+		localStorageObj.tabToBuild = thisID;
+		chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
+
+			openTabsInNewTab(thisList.title,thisList,false, false);
+		});
 	})
 
 	$("#select-all").click(function(){
@@ -238,10 +242,13 @@ $(document).ready(function(){
 				if(localStorageObj.lists == undefined) localStorageObj.lists = {};
 
 				localStorageObj.lists[cDateString] = newListElement;
-				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) { }
-		  		);
+				localStorageObj.tabToBuild = cDateString;
+				chrome.extension.sendRequest({method: "setLocalStorage",data:localStorageObj}, function(response) {
+		  		
+					openTabsInNewTab(titleOfList, newListElement, removeFromWindow, true);
+				});
 
-				openTabsInNewTab(titleOfList, newListElement, removeFromWindow, true);
+				
 			} 
 		}
 	}

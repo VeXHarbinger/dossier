@@ -99,32 +99,42 @@ function setCopyText(){
 	stringToCopy = batchString;
 }
 
+chrome.extension.sendRequest({method: "getLocalStorage"}, function(response) {
+	console.log(response.data);
+	if(response.data != "" && response.data != "undefined") {
+		localStorageObj = JSON.parse(response.data);
+
+		var thisTabObj = localStorageObj.lists[localStorageObj.tabToBuild];
+		tabs = localStorageObj.lists[localStorageObj.tabToBuild].tabs; //request.tabs.slice(0);
+		thisID = thisTabObj .date;
+	
+		$("#title").text("Dossier: "+thisTabObj.title);
+		document.title = thisTabObj.title;
+		thisTitle = thisTabObj.title;
+
+		//request.tabs.forEach(function(tab){
+		$.each(thisTabObj.tabs,function(key,tab){
+			var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
+			+ tab.favIconUrl+'"/>'+
+			tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
+
+			$("#dossier-tabs-saved-container").append(tabDiv);
+
+		});
+		setCopyText();
+	}
+});
 
 
 chrome.extension.onRequest.addListener(
-	function(request, sender, sendResponse) {
-		if(request.method == "newTab"){
-			if (request.tabs.length > 0){
+	function(requester, sender, sendResponse) {
+		if(requester.method == "newTab"){
+			//if (request.tabs.length > 0){
 				sendResponse({success: true});
-				tabs = request.tabs.slice(0);
-				thisID = request.date;
+				
 			
-				$("#title").text("Dossier: "+request.title);
-				document.title = request.title;
-				thisTitle = request.title;
 
-				//request.tabs.forEach(function(tab){
-				$.each(request.tabs,function(key,tab){
-					var tabDiv = '<div class="tab-element-collection"><img class="tab-favicon" src="'
-					+ tab.favIconUrl+'"/>'+
-					tab.title+'<a href="'+tab.url+'" target="_blank">link</a></div>';
-
-					$("#dossier-tabs-saved-container").append(tabDiv);
-
-				});
-				setCopyText();
-
-			} 
+			//} 
 		}
 });
 
