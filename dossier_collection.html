@@ -1,8 +1,8 @@
 <html>
 <head>
 <title>New Dossier List</title>
-<script src='jquery-1.6.4.min.js'></script>
-<script src='jquery.json-2.2.min.js'></script>
+<script type="text/javascript" src='jquery-1.6.4.min.js'></script>
+<script type="text/javascript" src='jquery.json-2.2.min.js'></script>
 <link rel="stylesheet" type="text/css" href="style.css"/>
 <link rel="shortcut icon" href="logo.gif" />
 </head>
@@ -10,7 +10,7 @@
 	<div id="title">Dossier: New List</div>
 	<div id="dossier-tabs-saved-container"></div>
 	<div id="action-container">
-		<div class="action" id="action-email">Email It</div>
+		<div class="action" id="action-copy">Copy to Clipboard</div>
 		<div class="action" id="action-restore">Restore Tabs</div>
 		<a href="" id="action-email-sendto">&nbsp;</a>
 	</div>
@@ -20,13 +20,16 @@
 		<div id="remove-button-yes">Yes, I'm sure.</div>
 		<div id="remove-button-no">No, thanks.</div>
 	</div>
+	<textarea id="hidden-copy-input" style="opacity:0"></textarea>
 </body>
 <script>
 
 var tabs;
 var thisID;
 var curTabID;
+var thisTitle;
 var localStorageObj;
+var stringToCopy;
 
 chrome.windows.getCurrent(function(window){
 	
@@ -36,7 +39,6 @@ chrome.windows.getCurrent(function(window){
 });
 
 $(document).ready(function(){
-
 	$("#remove-list-button").click(function(){
 		$("#remove-list-popover").slideDown();
 	})
@@ -59,18 +61,11 @@ $(document).ready(function(){
 		$("#remove-list-popover").slideUp();
 	});
 
-	$("#action-email").click(function(){
+	$("#action-copy").click(function(){
+		copyToClipboard(stringToCopy);
+		$(this).text("Copied!").css("background-color","#F22");
 		
-		var stringToEmail = "mailto: ?subject=Dossier Link List";
-		stringToEmail += "&body=Links gathered for you:" + 
-			encodeURIComponent("\n") + "--------------------------" + encodeURIComponent("\n\n");
-		
-		//tabs.forEach(function(tab){
-		$.each(tabs,function(key,tab){
-			stringToEmail += encodeURIComponent(tab.title) + encodeURIComponent("\n") +
-			encodeURIComponent(tab.url) + encodeURIComponent("\n\n");	
-		});
-		window.location.href = stringToEmail;
+		// window.location.href = stringToEmail;
 	})
 	
 	$("#action-restore").click(function(){
@@ -85,6 +80,26 @@ $(document).ready(function(){
 
 });
 
+function copyToClipboard( text ) {
+  var input = document.getElementById( 'hidden-copy-input' );
+  input.innerText = text;
+  input.focus();
+  input.select();
+  document.execCommand( 'Copy' );
+  input.blur();
+}
+
+function setCopyText(){
+	var batchString = "Dossier: "+thisTitle+ "\r\n\r\n";
+	
+	$.each(tabs,function(key,tab){
+		batchString += tab.title.toString() + "\r\n" + tab.url.toString() + "\r\n\r\n";
+	});
+
+	stringToCopy = batchString;
+}
+
+
 
 chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
@@ -96,6 +111,7 @@ chrome.extension.onRequest.addListener(
 			
 				$("#title").text("Dossier: "+request.title);
 				document.title = request.title;
+				thisTitle = request.title;
 
 				//request.tabs.forEach(function(tab){
 				$.each(request.tabs,function(key,tab){
@@ -106,9 +122,9 @@ chrome.extension.onRequest.addListener(
 					$("#dossier-tabs-saved-container").append(tabDiv);
 
 				});
-			} else {
-		  		sendResponse({success: false, error: "no tabs selected"}); 
-		  	}
+				setCopyText();
+
+			} 
 		}
 });
 

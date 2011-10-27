@@ -18,6 +18,9 @@ chrome.extension.onRequest.addListener(
 			if(localStorage.clump == "undefined") localStorage.clump = "";
 			localStorage.clump = JSON.stringify(request.data);
 			sendResponse({message:"setLocal",data: JSON.parse(localStorage.clump)});
+		} else if(request.method == "copyToClipboard"){
+			var response = copy(request.text);
+			sendResponse(response);
 		} else {
 			sendResponse({});
 		}

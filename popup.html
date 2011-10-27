@@ -248,7 +248,7 @@ $(document).ready(function(){
 
 	function openTabsInNewTab(listTitle, tabsToList, removeFromWindow, closePopover){
 		chrome.tabs.create({ url: "dossier_collection.html" },function(tab){
-			chrome.tabs.sendRequest(tab.id,tabsToList, function(response) { });
+			chrome.extension.sendRequest(tabsToList, function(response) { });
 		});
 		if(removeFromWindow) {
 			var tabCount = tabsToList.tabs.length;
