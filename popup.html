@@ -21,8 +21,8 @@
 		
 		<div id="tab-container"></div>
 		<div id="action-container">
-			<span id="action-bundle-keep">Bundle Tabs (do NOT remove from window)
-			</span>
+			<span id="action-bundle-keep">Bundle Tabs (do NOT remove from window)</span>
+			<span id="action-bundle-append">Add to Existing</span>
 			<div class="action" id="action-bundle">Bundle Tabs!</div>
 		</div>
 	</div>
@@ -203,9 +203,11 @@ $(document).ready(function(){
 		if($(".selected").length > 0){
 			$("#action-bundle").css("opacity",1);
 			$("#action-bundle-keep").css("opacity",1);
+			$("#action-bundle-append").css("opacity",1);
 		} else {
 			$("#action-bundle").css("opacity",0.5);
 			$("#action-bundle-keep").css("opacity",0.5);
+			$("#action-bundle-append").css("opacity",0.5);
 		}
 	}
 
@@ -215,6 +217,10 @@ $(document).ready(function(){
 
 	$("#action-bundle").click(function(){
 		sendTabsToCollection(true);
+	});
+
+	$("#action-bundle-append").click(function(){
+		
 	});
 
 	function sendTabsToCollection(removeFromWindow){
