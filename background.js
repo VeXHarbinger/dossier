@@ -1,16 +1,8 @@
-<html>
-<head>
-<title>Background</title>
-<script src='jquery-1.6.4.min.js'></script>
-<script src='jquery.json-2.2.min.js'></script>
-<link rel="stylesheet" type="text/css" href="style.css"/>
-<link rel="shortcut icon" href="logo.gif" />
-</head>
-<script>
 
-chrome.extension.onRequest.addListener(
+
+chrome.extension.onMessage.addListener(
 	function(request, sender, sendResponse) {
-	
+
 		if (request.method == "getLocalStorage") {
 			if(localStorage.clump == undefined) localStorage.clump = "";
 			sendResponse({message:"getLocal",data: localStorage.clump});
@@ -27,6 +19,3 @@ chrome.extension.onRequest.addListener(
 
 });
 
-
-</script>
-</html>

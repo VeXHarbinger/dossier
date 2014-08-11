@@ -1,18 +1,23 @@
 {
   "name": "Dossier",
-  "version": "1.2",
+  "version": "2.1",
+  "manifest_version": 2,
+  "default_locale": "en",
   "description": "Tab collections, made simple.",
   "browser_action": {
     "default_icon": "logo.gif",
     "default_title": "Dossier",
-    "popup": "popup.html"
+    "default_popup": "popup.html"
   },
-  "icons": { "16": "i16.png",
-           "48": "i48.png",
+  "icons": { "19": "i16.png",
+           "38": "i48.png",
           "128": "i128.png" },
   "permissions": [
     "http://*/*",
     "tabs"
   ],
-  "background_page": "background.html"
+  "background": {
+    "scripts": ["background.js","collection.js","popup.js"],
+    "persistent": false
+  }
 }
